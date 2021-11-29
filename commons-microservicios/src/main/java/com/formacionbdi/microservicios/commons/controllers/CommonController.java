@@ -1,18 +1,22 @@
 package com.formacionbdi.microservicios.commons.controllers;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+
+import com.formacionbdi.microservicios.commons.services.CommonService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.formaciondbi.microservicios.commons.services.CommonService;
 
 @RestController
 public class CommonController <E, S extends CommonService<E>> {
@@ -35,7 +39,10 @@ public class CommonController <E, S extends CommonService<E>> {
 	}
 	
 	@PostMapping
-	public ResponseEntity<?> crear(@RequestBody E entity){
+	public ResponseEntity<?> crear(@Validated @RequestBody E entity, BindingResult result){
+		if(result.hasErrors()){
+			return this.validar(result);
+		}
 		E entityDb = service.save(entity);
 		return ResponseEntity.status(HttpStatus.CREATED).body(entityDb);
 	}
@@ -44,6 +51,14 @@ public class CommonController <E, S extends CommonService<E>> {
 	public ResponseEntity<?> eliminar(@PathVariable Long id){
 		service.deleteById(id);
 		return ResponseEntity.noContent().build();
+	}
+
+	protected ResponseEntity<?> validar(BindingResult result){
+		Map<String, Object> errores = new HashMap<>();
+		result.getFieldErrors().forEach(error -> {
+			errores.put(error.getField(), "El campos " + error.getField() + ": " + error.getDefaultMessage());
+		});
+		return ResponseEntity.badRequest().body(errores);
 	}
 	
 }
