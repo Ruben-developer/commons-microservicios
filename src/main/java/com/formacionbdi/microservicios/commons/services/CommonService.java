@@ -6,6 +6,8 @@ public interface CommonService<E> {
 
 	public Iterable<E> findAll();
 	
+	public Page<E> findAll(Pageable pageable);
+	
 	public Optional<E> findById(Long id);
 	
 	public E save(E entity);

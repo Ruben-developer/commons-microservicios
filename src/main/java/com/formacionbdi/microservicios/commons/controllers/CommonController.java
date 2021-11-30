@@ -28,6 +28,11 @@ public class CommonController <E, S extends CommonService<E>> {
 	public ResponseEntity<?> listar(){
 		return ResponseEntity.ok().body(service.findAll());
 	}
+
+	@GetMapping("/pagina")
+	public ResponseEntity<?> listar(Pageable pageable){
+		return ResponseEntity.ok().body(service.findAll(pageable));
+	}
 	
 	@GetMapping("/{id}")
 	public ResponseEntity<?> ver(@PathVariable Long id){
